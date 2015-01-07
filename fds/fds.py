@@ -21,7 +21,7 @@ def echo(url, n):
         ws = yield websocket_connect(url)
     except:
         sys.exit(1)
-    
+
     for i in count():
         ws.write_message('%i:%i' % (n, i))
         yield ws.read_message()
