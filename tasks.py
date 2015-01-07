@@ -1,24 +1,26 @@
 from invoke import task, run
 
 @task
-def server():
-    print("starting echo container")
-    run('docker run --name echo --net=host -dt stress-echo')
-
+def server(n=1):
     print("starting proxy container")
-    run('docker run --name proxy -dt --net=host jupyter/configurable-http-proxy --api-ip=0.0.0.0 --default-target=http://127.0.0.1:9000')
+    run('docker run --name proxy -p 8000:8000 -dt jupyter/configurable-http-proxy --api-ip=0.0.0.0')
+
+    for i in range(n):
+        print("starting worker container %i" % i)
+        run('docker run --link proxy:proxy --name worker%i -dt stress-worker --id=%i' % (i, i))
 
 @task
-def client(proxy='localhost'):
+def client(n=1, proxy='localhost'):
     try:
         print('starting client')
-        run('docker run --name fds -it stress-fds --proxy=%s' % proxy)
+        run('docker run --name fds -it stress-fds --proxy=%s --n=%i' % (proxy, n))
     finally:
         cleanup_client()
 
 @task
-def cleanup():
-    run('docker rm -f proxy echo')
+def cleanup_server(n=1):
+    workers = ['worker%s' % i for i in range(n)]
+    run('docker rm -f proxy %s' % " ".join(workers))
 
 @task
 def cleanup_client():
@@ -26,7 +28,7 @@ def cleanup_client():
 
 @task
 def build_server():
-    run('docker build -t stress-echo echo')
+    run('docker build -t stress-worker worker')
 
 @task
 def build_client():

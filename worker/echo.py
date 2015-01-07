@@ -22,5 +22,6 @@ if __name__ == '__main__':
         (r'.*/ws', EchoWS),
         (r'.*', EchoHTTP),
     ])
+    print("listening on port %s" % options.port)
     app.listen(options.port)
     IOLoop.current().start()
