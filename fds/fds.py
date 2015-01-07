@@ -20,6 +20,7 @@ def echo(url, n):
     try:
         ws = yield websocket_connect(url)
     except:
+        print("couldn't connect to websocket")
         sys.exit(1)
 
     for i in count():
@@ -48,5 +49,6 @@ if options.echo == 'localhost':
     time.sleep(1)
     assert worker.poll() is None
 
+print(options.proxy)
 start_echo(options.proxy, 0)
 IOLoop.current().start()
