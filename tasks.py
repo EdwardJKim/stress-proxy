@@ -1,71 +1,43 @@
-import time
-import socket
-from subprocess import Popen, check_output, check_call
-
 from invoke import task, run
-
-def start_proxy():
-    return check_output([
-        'docker', 'run', '--name=proxy', '-dt', 'jupyter/configurable-http-proxy', '--api-ip=0.0.0.0',
-    ]).decode('ascii').strip()
-
-def start_workers(n):
-    return check_output([
-        'docker', 'run', '--name=worker', '--link', 'proxy:proxy', '-dt', 'stress-worker', '-n=%i' % n,
-    ])
-
-def run_client(n, p):
-    return check_call([
-        'docker', 'run', '--name=client', '--link', 'proxy:proxy', '-it', 'stress-client',
-        '--nservers=%i' % p,
-        '--n=%i' % n,
-        '--b=1024',
-    ])
+import time
 
 @task
-def fds(local_echo=False, local_proxy=False):
-    args = ''
-    if not local_echo:
-        print("starting echo container")
-        run('docker run --name echo --net=host -dt stress-echo')
-    if not local_proxy:
-        assert not local_echo
-        print("starting proxy container")
-        cmd = 'docker run --name proxy -dt --net=host jupyter/configurable-http-proxy --api-ip=0.0.0.0 --default-target=http://127.0.0.1:9000'
-        run(cmd)
-    
+def server():
+    print("starting proxy container")
+    run('docker run --name proxy -p 8000:8000 -dt jupyter/configurable-http-proxy --api-ip=0.0.0.0')
+
+@task
+def client(host, n, proxy='localhost'):
+    n = int(n)
+
+    print('starting worker containers')
+    for i in range(n):
+        print("starting worker container %i" % i)
+        run('ssh %s docker run --link proxy:proxy --name worker%i -dt stress-worker --id=%i' % (host, i, i))
+
+    time.sleep(1)
     try:
-        time.sleep(1)
-        cmd = 'docker run --net=host'
-        args = '' 
-        if not local_echo and local_proxy:
-            # cmd += ' --link echo:echo '
-            args += ' --echo=echo '
-        if not local_proxy:
-            # cmd += ' --link proxy:proxy '
-            args += ' --proxy=proxy '
         print('starting client')
-        run(cmd + ' --name fds -it stress-fds ' + args)
+        run('docker run --name fds -it stress-fds --proxy=%s --n=%i' % (proxy, n))
     finally:
-        cleanup()
+        cleanup_client(host, n)
 
 @task
-def test(n=1, p=1):
-    try:
-        proxy_id = start_proxy()
-        worker_id = start_workers(n)
-        time.sleep(0.1 * n)
-        run_client(n, p)
-    finally:
-        cleanup()
+def cleanup_server(n=1):
+    run('docker rm -f proxy')
+    workers = ['worker%s' % i for i in range(n)]
+    run('docker rm -f %s' % " ".join(workers))
 
 @task
-def cleanup():
-    run('docker rm -f proxy worker client echo fds')
+def cleanup_client(host, n):
+    run('docker rm -f fds')
+    workers = ['worker%s' % i for i in range(n)]
+    run('ssh %s docker rm -f %s' % (host, " ".join(workers)))
 
 @task
-def build():
+def build_server():
     run('docker build -t stress-worker worker')
-    run('docker build -t stress-client client')
-    run('docker build -t stress-echo echo')
+
+@task
+def build_client():
     run('docker build -t stress-fds fds')

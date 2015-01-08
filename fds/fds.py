@@ -1,8 +1,4 @@
-from binascii import hexlify
-import os
 import sys
-import time
-from subprocess import Popen
 from itertools import count
 
 from tornado.gen import coroutine, Task
@@ -20,33 +16,27 @@ def echo(url, n):
     try:
         ws = yield websocket_connect(url)
     except:
+        print("couldn't connect to websocket (%s %s)" % (url, n))
         sys.exit(1)
-    
+
+    print("connected to %s %s" % (url, n))
     for i in count():
         ws.write_message('%i:%i' % (n, i))
         yield ws.read_message()
-        print(n, i)
         yield sleep(5)
     ws.close()
 
-def start_echo(host, n):
-    print("starting", n)
+def start_echo(host, name, n):
     loop = IOLoop.current()
-    echo('ws://%s:8000/test/ws' % host, n)
-    loop.add_timeout(loop.time() + 0.25, start_echo, host, n+1)
+    url = 'ws://%s:8000/%s/ws' % (host, name)
+    echo(url, n)
+    loop.add_timeout(loop.time() + 0.25, start_echo, host, name, n+1)
 
-define("echo", default='echo')
 define("proxy", default='proxy')
+define("n", default=1, type=int, help="number of workers")
 parse_command_line()
-if options.proxy == 'localhost':
-    proxy = Popen(['configurable-http-proxy', '--default-target=http://%s:9000' % options.echo])
-    time.sleep(1)
-    assert proxy.poll() is None
 
-if options.echo == 'localhost':
-    worker = Popen([sys.executable, 'echo.py', '--port=9000'])
-    time.sleep(1)
-    assert worker.poll() is None
-
-start_echo(options.proxy, 0)
+print(options.proxy)
+for i in range(options.n):
+    start_echo(options.proxy, i, 0)
 IOLoop.current().start()
