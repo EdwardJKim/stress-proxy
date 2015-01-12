@@ -9,6 +9,8 @@ RUN pip3 install -r /tmp/requirements.txt
 COPY . /srv/hub
 WORKDIR /srv/hub
 
-USER nobody
+ADD https://raw.githubusercontent.com/minrk/nbbot/master/nbbot.py /srv/hub/nbbot.py
+RUN chmod 700 /srv/hub
+
 ENTRYPOINT ["python3", "hub.py"]
 
