@@ -47,16 +47,25 @@ address of the proxy (probably the IP address of `<hostname>`).
 
 ## Host
 
-You'll need to install whatever version of JupyterHub you want. Then:
+First, build the necessary JupyterHub image:
 
 ```
-invoke jupyterhub <image>
+invoke build_jupyterhub
 ```
 
-where `<image>` is the name of the JupyterHub image you want to run
-(for example, `jupyter/jupyterhub`).
+Now, run the restuser service:
 
-To clean up the JupyterHub docker images, run:
+```
+invoke restuser
+```
+
+Finally, run JupyterHub:
+
+```
+invoke jupyterhub
+```
+
+To clean up the JupyterHub docker images and any users that were created, run:
 
 ```
 invoke cleanup_jupyterhub
@@ -73,8 +82,11 @@ invoke build_hub
 Run stress test:
 
 ```
-invoke stress_hub <url> <port> <user>
+invoke stress_hub <url> --port=<port> -N=<num_users>
 ```
 
 where `<url>` is the url of the host where JupyterHub is running and
-`<port>` is the port number that JupyterHub is running on.
+`<port>` is the port number that JupyterHub is running on. The
+`<num_users>` argument is for the number of users to test
+simultaneously.
+
