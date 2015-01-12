@@ -88,5 +88,5 @@ invoke stress_hub <url> --port=<port> -N=<num_users>
 where `<url>` is the url of the host where JupyterHub is running and
 `<port>` is the port number that JupyterHub is running on. The
 `<num_users>` argument is for the number of users to test
-simultaneously.
+simultaneously (maximum 100).
 
