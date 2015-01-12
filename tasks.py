@@ -55,12 +55,22 @@ def cleanup_fds(host, n):
 # Server
 
 @task
-def jupyterhub(image):
-    run('docker run --name jupyterhub -p 8000:8000 -d --net=host -v /var/run/docker.sock:/docker.sock %s' % image)
+def build_jupyterhub():
+    run('docker build -t jupyterhub jupyterhub')
+    run('docker pull jhamrick/systemuser')
+
+@task
+def restuser():
+    run('curl -s https://raw.githubusercontent.com/minrk/restuser/master/restuser.py > restuser.py')
+    run('python restuser.py --socket=/var/run/restuser.sock')
+
+@task
+def jupyterhub():
+    run('docker run --name jupyterhub -p 8000:8000 -d --net=host -v /var/run/docker.sock:/docker.sock -v /var/run/restuser.sock:/restuser.sock jupyterhub')
 
 @task
 def cleanup_jupyterhub():
-    run('docker rm -f jupyterhub')
+    run('docker rm -f jupyterhub jupyter-user0')
 
 # Client
 
