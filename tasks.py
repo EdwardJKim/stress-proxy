@@ -1,5 +1,6 @@
 from invoke import task, run
 import time
+import subprocess
 
 ## Proxy stress testing
 
@@ -61,8 +62,8 @@ def build_jupyterhub():
 
 @task
 def restuser():
-    run('curl -s https://raw.githubusercontent.com/minrk/restuser/master/restuser.py > restuser.py')
-    run('python restuser.py --socket=/var/run/restuser.sock')
+    run('curl -s https://raw.githubusercontent.com/jhamrick/restuser/master/restuser.py > restuser.py')
+    subprocess.call(['python', 'restuser.py', '--socket=/var/run/restuser.sock', '--skeldir=skeldir'])
 
 @task
 def jupyterhub():
@@ -70,7 +71,12 @@ def jupyterhub():
 
 @task
 def cleanup_jupyterhub():
-    run('docker rm -f jupyterhub jupyter-user0')
+    run('docker rm -f jupyterhub')
+    with open('userlist', 'r') as fh:
+        users = fh.read().strip().split("\n")
+    for user in users:
+        run('docker rm -f jupyter-{}'.format(user))
+        run('deluser --remove-home {}'.format(user))
 
 # Client
 
