@@ -37,6 +37,8 @@ if __name__ == "__main__":
     define('N', type=int, default=1, help="number of users")
     parse_command_line()
 
+    gen_log.setLevel('DEBUG')
+
     loop = IOLoop.current()
     for i in range(options.N):
         loop.run_sync(lambda: start_notebook(options.url, options.port, "user{}".format(i)))
