@@ -62,7 +62,7 @@ def build_jupyterhub():
 
 @task
 def restuser():
-    run('curl -s https://raw.githubusercontent.com/jhamrick/restuser/master/restuser.py > restuser.py')
+    run('curl -s https://raw.githubusercontent.com/minrk/restuser/master/restuser.py > restuser.py')
     subprocess.call(['python', 'restuser.py', '--socket=/var/run/restuser.sock', '--skeldir=skeldir'])
 
 @task
