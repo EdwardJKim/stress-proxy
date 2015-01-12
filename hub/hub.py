@@ -17,7 +17,6 @@ def login(hub_url, username, password):
     response.raise_for_status()
     return response.history[0].cookies
 
-
 if __name__ == "__main__":
     define('url', default='localhost')
     define('port', default='8000')
@@ -33,7 +32,7 @@ if __name__ == "__main__":
     api = NBAPI(url=user_url, cookies=cookies)
     loop = IOLoop.current()
 
-    paths = ['Untitled.ipynb']
+    paths = ['Hello.ipynb']
     for path in paths:
         gen_log.info("Running %s/notebooks/%s", api.url, path)
         loop.run_sync(lambda: open_run_save(api, path))
