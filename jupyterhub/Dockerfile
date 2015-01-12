@@ -17,7 +17,7 @@ ENV OAUTHENTICATOR_DIR /srv/oauthenticator
 RUN chmod 700 /srv/oauthenticator
 
 # install docker_oauth
-ADD https://raw.githubusercontent.com/jhamrick/docker-oauthenticator/docker-authenticator/docker_oauth.py /srv/oauthenticator/docker_oauth.py
+ADD https://raw.githubusercontent.com/jhamrick/docker-oauthenticator/master/docker_oauth.py /srv/oauthenticator/docker_oauth.py
 ADD auth.py /srv/oauthenticator/auth.py
 
 ADD userlist /srv/oauthenticator/userlist
