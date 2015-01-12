@@ -71,12 +71,12 @@ def jupyterhub():
 
 @task
 def cleanup_jupyterhub():
-    run('docker rm -f jupyterhub')
-    with open('userlist', 'r') as fh:
+    run('docker rm -f jupyterhub || true')
+    with open('jupyterhub/userlist', 'r') as fh:
         users = fh.read().strip().split("\n")
     for user in users:
-        run('docker rm -f jupyter-{}'.format(user))
-        run('deluser --remove-home {}'.format(user))
+        run('docker rm -f jupyter-{} || true'.format(user))
+        run('deluser --remove-home {} || true'.format(user))
 
 # Client
 
