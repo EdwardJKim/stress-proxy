@@ -85,10 +85,10 @@ def build_hub():
     run('docker build -t stress-hub hub')
 
 @task
-def stress_hub(url, port=8000, user='user1'):
+def stress_hub(url, port=8000, N=1):
     try:
         print('starting stress client')
-        run('docker run --name hub --net=host -it stress-hub --url=%s --port=%s --user=%s' % (url, port, user))
+        run('docker run --name hub --net=host -it stress-hub --url=%s --port=%s --N=%s' % (url, port, N))
     finally:
         cleanup_hub()
 
