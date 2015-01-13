@@ -47,7 +47,14 @@ address of the proxy (probably the IP address of `<hostname>`).
 
 ## Host
 
-First, build the necessary JupyterHub image:
+The first time you run the server processes, you'll need to run:
+
+```
+invoke setup_server
+```
+
+After that, you shouldn't need to run that again. Next, build the
+necessary JupyterHub image:
 
 ```
 invoke build_jupyterhub
@@ -65,7 +72,8 @@ Finally, run JupyterHub:
 invoke jupyterhub
 ```
 
-To clean up the JupyterHub docker images and any users that were created, run:
+To clean up the JupyterHub docker images and any users that were
+created, run:
 
 ```
 invoke cleanup_jupyterhub
@@ -88,5 +96,6 @@ invoke stress_hub <url> --port=<port> -N=<num_users>
 where `<url>` is the url of the host where JupyterHub is running and
 `<port>` is the port number that JupyterHub is running on. The
 `<num_users>` argument is for the number of users to test
-simultaneously (maximum 100).
+simultaneously (maximum 100). You can also pass a `--hubid` argument
+if you want to run multiple stress processes at once.
 
