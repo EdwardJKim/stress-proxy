@@ -12,5 +12,5 @@ WORKDIR /srv/hub
 ADD https://raw.githubusercontent.com/minrk/nbbot/master/nbbot.py /srv/hub/nbbot.py
 RUN chmod 700 /srv/hub
 
-ENTRYPOINT ["python3", "hub.py"]
+ENTRYPOINT ["python3", "runner.py"]
 

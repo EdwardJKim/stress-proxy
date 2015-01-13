@@ -56,6 +56,11 @@ def cleanup_fds(host, n):
 # Server
 
 @task
+def setup_server():
+    run('apt-get install build-essential python-dev')
+    run('pip install tornado')
+
+@task
 def build_jupyterhub():
     run('docker build -t jupyterhub jupyterhub')
     run('docker pull jhamrick/systemuser')
@@ -85,13 +90,13 @@ def build_hub():
     run('docker build -t stress-hub hub')
 
 @task
-def stress_hub(url, port=8000, N=1):
+def stress_hub(url, port=8000, N=1, hubid="hub"):
     try:
         print('starting stress client')
-        run('docker run --name hub --net=host -it stress-hub --url=%s --port=%s --N=%s' % (url, port, N))
+        run('docker run --name %s --net=host -it stress-hub --url=%s --port=%s --N=%s' % (hubid, url, port, N))
     finally:
-        cleanup_hub()
+        cleanup_hub(hubid=hubid)
 
 @task
-def cleanup_hub():
-    run('docker rm -f hub')
+def cleanup_hub(hubid="hub"):
+    run('docker rm -f %s' % hubid)
