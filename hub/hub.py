@@ -16,7 +16,7 @@ def login(hub_url, username, password):
     url = hub_url + '/login?next='
     response = requests.post(url, params=dict(
         username=username,
-        password=password))
+        password=password), verify=False)
     response.raise_for_status()
     return response.history[0].cookies
 
@@ -26,8 +26,8 @@ def sleep(t):
 
 @coroutine
 def start_notebook(url, port, user):
-    hub_url = 'http://%s:%s/hub' % (url, port)
-    user_url = 'http://%s:%s/user/%s' % (url, port, user)
+    hub_url = 'https://%s:%s/hub' % (url, port)
+    user_url = 'https://%s:%s/user/%s' % (url, port, user)
 
     cookies = login(hub_url, user, user)
     api = NBAPI(url=user_url, cookies=cookies)
@@ -54,9 +54,10 @@ def start_notebook(url, port, user):
             api.kill_kernel(kernel['id'])
 
 
+    gen_log.info("history: %s", response.history)
 if __name__ == "__main__":
     define('url', default='localhost')
-    define('port', default='8000')
+    define('port', default='443')
     define('user', default='user')
     parse_command_line()
 

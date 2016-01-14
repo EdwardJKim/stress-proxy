@@ -1,2 +1,2 @@
-tornado>=4
+-e git://github.com/tornadoweb/tornado.git#egg=tornado
 requests
